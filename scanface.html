@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Рабочий кабинет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F6F7F9;
+    --surface: #FFFFFF;
+    --border: #E5E8EC;
+    --border-strong: #D3D8DF;
+    --text: #12151A;
+    --text-muted: #6B7280;
+    --text-faint: #A0A6B0;
+
+    --accent: #4338CA;
+    --accent-soft: #EEF0FD;
+
+    --danger: #DC2626;
+    --danger-soft: #FEF2F2;
+    --danger-border: #FECACA;
+
+    --warning: #B45309;
+    --warning-soft: #FFFBEB;
+    --warning-border: #FDE39B;
+
+    --success: #15803D;
+    --success-soft: #F0FDF4;
+    --success-border: #BBF7D0;
+
+    --project-color: #4338CA;
+    --task-color: #B45309;
+
+    --radius: 14px;
+    --shadow-sm: 0 1px 2px rgba(16, 21, 26, 0.04);
+    --shadow-md: 0 4px 16px rgba(16, 21, 26, 0.06);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 80px; }
+
+  /* --- Шапка --- */
+  .page-header { margin-bottom: 20px; }
+  .page-header h1 { font-size: 20px; font-weight: 700; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .page-header .subtitle { font-size: 13px; color: var(--text-muted); margin: 0; }
+
+  /* --- Вкладки: сегментированный переключатель --- */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 3px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow-sm);
+  }
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: none;
+    background: none;
+    padding: 9px 10px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 9px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tab-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { background: var(--text); color: #fff; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn 0.15s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* --- Общее --- */
+  .status-line { padding: 40px 0; text-align: center; color: var(--text-faint); font-size: 13.5px; }
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+  h2.block-title { font-size: 17px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .subtitle { font-size: 13px; color: var(--text-muted); margin: 0 0 16px; line-height: 1.5; }
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-faint);
+    margin: 22px 0 10px;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  /* --- Опросы: список --- */
+  .survey-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.15s, transform 0.1s;
+  }
+  .survey-card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .survey-card .icon-badge {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .survey-card .icon-badge svg { width: 16px; height: 16px; }
+  .survey-card .body { flex: 1; min-width: 0; }
+  .survey-card .title { font-weight: 600; font-size: 14.5px; }
+  .survey-card .desc {
+    font-size: 12.5px; color: var(--text-muted); margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .survey-card .chevron { color: var(--text-faint); flex-shrink: 0; }
+  .survey-card .chevron svg { width: 16px; height: 16px; }
+
+  /* --- Форма опроса --- */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .field .required { color: var(--danger); margin-left: 2px; }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field .error { color: var(--danger); font-size: 12px; margin-top: 5px; font-weight: 500; }
+  .back-link {
+    font-size: 13px; color: var(--text-muted); cursor: pointer;
+    margin-bottom: 14px; display: inline-flex; align-items: center; gap: 4px;
+    font-weight: 500;
+  }
+  .back-link:hover { color: var(--text); }
+  .submit-btn {
+    width: 100%;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .submit-btn:hover:not(:disabled) { background: var(--accent); }
+  .submit-btn:disabled { opacity: .5; cursor: default; }
+  .success-box {
+    background: var(--success-soft);
+    border: 1px solid var(--success-border);
+    color: var(--success);
+    border-radius: var(--radius);
+    padding: 18px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* --- Задачи --- */
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+    box-shadow: var(--shadow-sm);
+  }
+  .task-card.overdue { border-color: var(--danger-border); background: var(--danger-soft); }
+  .task-card.urgent { border-color: var(--warning-border); background: var(--warning-soft); }
+  .task-card .title { font-weight: 600; font-size: 14px; line-height: 1.35; }
+  .task-card .meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 7px; border-radius: 6px;
+    line-height: 1.6;
+  }
+  .badge.priority-urgent { background: var(--danger-soft); color: var(--danger); }
+  .badge.priority-high { background: var(--warning-soft); color: var(--warning); }
+  .badge.priority-medium { background: var(--accent-soft); color: var(--accent); }
+  .badge.priority-low { background: #F3F4F6; color: var(--text-muted); }
+  .meta-text { font-size: 12px; color: var(--text-muted); }
+  .task-card select {
+    font-size: 12px; font-family: inherit; font-weight: 500;
+    border: 1px solid var(--border-strong); border-radius: 8px;
+    padding: 5px 8px; background: var(--surface); color: var(--text);
+    flex-shrink: 0;
+  }
+
+  /* --- Календарь --- */
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .cal-header h1 { font-size: 16px; font-weight: 700; margin: 0; }
+  .nav-btn {
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+    cursor: pointer; padding: 6px 10px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .nav-btn svg { width: 15px; height: 15px; }
+  .weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    text-align: center; font-size: 11px; font-weight: 600; color: var(--text-faint);
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .day {
+    aspect-ratio: 1; border: 1px solid var(--border); border-radius: 10px; padding: 6px;
+    display: flex; flex-direction: column; background: var(--surface); text-align: left;
+    transition: border-color 0.15s;
+  }
+  .day.other-month { background: transparent; border-color: transparent; color: var(--text-faint); }
+  .day.today { border-color: var(--text); border-width: 1.5px; }
+  .day.today .day-number { color: var(--text); font-weight: 700; }
+  .day.has-events { cursor: pointer; }
+  .day.has-events:hover { border-color: var(--border-strong); }
+  .day.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .day-number { font-size: 12px; color: var(--text-muted); }
+  .dots { margin-top: auto; display: flex; flex-wrap: wrap; gap: 3px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot.task { background: var(--task-color); }
+  .dot.project { background: var(--project-color); }
+  .legend { display: flex; gap: 16px; margin-top: 14px; font-size: 12px; color: var(--text-muted); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .detail-panel {
+    margin-top: 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; display: none; box-shadow: var(--shadow-sm);
+  }
+  .detail-panel.visible { display: block; }
+  .event-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; padding: 8px 0; border-top: 1px solid var(--border); }
+  .event-row:first-child { border-top: none; padding-top: 0; }
+  .event-row .title { font-weight: 500; }
+  .event-type { margin-left: auto; font-size: 11px; color: var(--text-faint); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="page-header">
+    <h1>Рабочий кабинет</h1>
+    <p class="subtitle">Опросы, задачи и дедлайны — в одном месте</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="surveys">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Опросы
+    </button>
+    <button class="tab-btn" data-tab="tasks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Задачи
+    </button>
+    <button class="tab-btn" data-tab="calendar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Календарь
+    </button>
+  </div>
+
+  <div class="tab-panel active" id="panel-surveys">
+    <div id="surveysStatus" class="status-line"></div>
+    <div id="surveyListView"></div>
+    <div id="surveyFormView" style="display:none;"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-tasks">
+    <div id="tasksStatus" class="status-line"></div>
+    <div id="tasksList"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-calendar">
+    <div class="cal-header">
+      <button class="nav-btn" id="prevBtn" aria-label="Предыдущий месяц">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1 id="monthLabel"></h1>
+      <button class="nav-btn" id="nextBtn" aria-label="Следующий месяц">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="weekdays"><div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div></div>
+    <div class="cal-grid" id="calendarGrid"></div>
+    <div class="legend">
+      <span class="legend-item"><span class="dot task"></span>задача</span>
+      <span class="legend-item"><span class="dot project"></span>проект</span>
+    </div>
+    <div class="detail-panel" id="detailPanel">
+      <p class="section-title" id="detailTitle" style="margin:0 0 10px;"></p>
+      <div id="detailList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // ==== Ваши реальные данные проекта ====
+  const SUPABASE_URL = "https://fxthjfdczdumpcclcqke.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_FJ7l6aiM77-asrwBk9VQRw_GEEkbGwA";
+  // =======================================
+
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ============================================================
+  // ВКЛАДКИ
+  // ============================================================
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(`panel-${btn.dataset.tab}`).classList.add("active");
+    });
+  });
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str ?? "";
+    return div.innerHTML;
+  }
+
+  // ============================================================
+  // ОПРОСЫ
+  // ============================================================
+  async function loadSurveys() {
+    const statusEl = document.getElementById("surveysStatus");
+    statusEl.textContent = "Загрузка опросов...";
+
+    const { data, error } = await supabase
+      .from("surveys")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      statusEl.textContent = "Ошибка: " + error.message;
+      return;
+    }
+
+    statusEl.textContent = "";
+    const listView = document.getElementById("surveyListView");
+
+    if (!data.length) {
+      listView.innerHTML = `<div class="empty-state">Активных опросов пока нет.<br>Как только заказчица создаст опрос — он появится здесь автоматически.</div>`;
+      return;
+    }
+
+    listView.innerHTML = data.map(s => `
+      <div class="survey-card" data-id="${s.id}">
+        <div class="icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="body">
+          <div class="title">${escapeHtml(s.title)}</div>
+          ${s.description ? `<div class="desc">${escapeHtml(s.description)}</div>` : ""}
+        </div>
+        <div class="chevron">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    `).join("");
+
+    listView.querySelectorAll(".survey-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const survey = data.find(s => s.id === card.dataset.id);
+        renderSurveyForm(survey);
+      });
+    });
+  }
+
+  function renderSurveyForm(survey) {
+    document.getElementById("surveyListView").style.display = "none";
+    const formView = document.getElementById("surveyFormView");
+    formView.style.display = "block";
+
+    function fieldHtml(q) {
+      const req = q.required ? '<span class="required">*</span>' : "";
+      let control = "";
+      if (q.type === "text" || q.type === "email") {
+        control = `<input type="${q.type}" id="f_${q.id}" />`;
+      } else if (q.type === "textarea") {
+        control = `<textarea id="f_${q.id}" rows="4"></textarea>`;
+      } else if (q.type === "select") {
+        control = `<select id="f_${q.id}"><option value="">Выберите...</option>${
+          q.options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("")
+        }</select>`;
+      } else if (q.type === "checkbox") {
+        control = `<label style="font-weight:400;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="f_${q.id}" style="width:auto;" /> ${escapeHtml(q.checkboxLabel || "Да")}
+        </label>`;
+      }
+      return `
+        <div class="field" data-qid="${q.id}">
+          <label>${escapeHtml(q.label)}${req}</label>
+          ${control}
+          <div class="error" style="display:none;"></div>
+        </div>
+      `;
+    }
+
+    formView.innerHTML = `
+      <span class="back-link" id="backToList">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        ко всем опросам
+      </span>
+      <h2 class="block-title">${escapeHtml(survey.title)}</h2>
+      ${survey.description ? `<p class="subtitle">${escapeHtml(survey.description)}</p>` : ""}
+      <form id="surveyForm">
+        ${survey.questions.map(fieldHtml).join("")}
+        <button type="submit" class="submit-btn" id="submitBtn">Отправить</button>
+      </form>
+    `;
+
+    document.getElementById("backToList").addEventListener("click", () => {
+      formView.style.display = "none";
+      document.getElementById("surveyListView").style.display = "block";
+    });
+
+    document.getElementById("surveyForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const answers = {};
+      let hasError = false;
+
+      survey.questions.forEach(q => {
+        const el = document.getElementById(`f_${q.id}`);
+        const fieldEl = formView.querySelector(`.field[data-qid="${q.id}"]`);
+        const errEl = fieldEl.querySelector(".error");
+        errEl.style.display = "none";
+
+        let value = q.type === "checkbox" ? el.checked : el.value;
+
+        if (q.required && (value === "" || value === false || value === undefined)) {
+          errEl.textContent = "Обязательное поле";
+          errEl.style.display = "block";
+          hasError = true;
+        }
+        if (q.type === "email" && value) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value)) {
+            errEl.textContent = "Некорректный email";
+            errEl.style.display = "block";
+            hasError = true;
+          }
+        }
+        answers[q.id] = value;
+      });
+
+      if (hasError) return;
+
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Отправка...";
+
+      const { error } = await db.from("survey_responses").insert({
+        survey_id: survey.id,
+        respondent_name: answers.name ?? null,
+        respondent_email: answers.email ?? null,
+        answers,
+      });
+
+      if (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Отправить";
+        alert("Не удалось отправить: " + error.message);
+        return;
+      }
+
+      formView.innerHTML = `
+        <div class="success-box">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          Спасибо! Ответ отправлен.
+        </div>
+        <span class="back-link" id="backToList2" style="margin-top:14px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          ко всем опросам
+        </span>`;
+      document.getElementById("backToList2").addEventListener("click", () => {
+        formView.style.display = "none";
+        document.getElementById("surveyListView").style.display = "block";
+      });
+    });
+  }
+
+  // ============================================================
+  // ЗАДАЧИ
+  // ============================================================
+  const PRIORITY_LABEL = { urgent: "Срочный", high: "Высокий", medium: "Средний", low: "Низкий" };
+  const STATUS_LABEL = { backlog: "Бэклог", in_progress: "В работе", review: "На проверке", done: "Готово", cancelled: "Отменено" };
+
+  function groupTasksByDeadline(tasks, now = new Date()) {
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfDayAfterTomorrow = new Date(startOfToday);
+    startOfDayAfterTomorrow.setDate(startOfDayAfterTomorrow.getDate() + 2);
+
+    const groups = { overdue: [], urgent: [], upcoming: [], noDeadline: [] };
+    const active = tasks.filter(t => t.status !== "done" && t.status !== "cancelled");
+
+    active.forEach(task => {
+      if (!task.deadline) { groups.noDeadline.push(task); return; }
+      const deadline = new Date(task.deadline);
+      if (deadline < startOfToday) groups.overdue.push(task);
+      else if (deadline < startOfDayAfterTomorrow) groups.urgent.push(task);
+      else groups.upcoming.push(task);
+    });
+
+    const byDeadlineAsc = (a, b) => new Date(a.deadline) - new Date(b.deadline);
+    groups.overdue.sort(byDeadlineAsc);
+    groups.urgent.sort(byDeadlineAsc);
+    groups.upcoming.sort(byDeadlineAsc);
+    return groups;
+  }
+
+  async function loadTasks() {
+    const statusEl = document.getElementById("tasksStatus");
+    statusEl.textContent = "Загрузка задач...";
+
+    const { data, error } = await db.from("tasks").select("*").order("deadline", { ascending: true });
+
+    if (error) {
+      statusEl.textContent = "Ошибка: " + error.message;
+      return;
+    }
+    statusEl.textContent = "";
+
+    const grouped = groupTasksByDeadline(data);
+    const sections = [
+      { key: "overdue", title: "Просрочены", cls: "overdue" },
+      { key: "urgent", title: "Горят: сегодня и завтра", cls: "urgent" },
+      { key: "upcoming", title: "В планах", cls: "" },
+      { key: "noDeadline", title: "Без дедлайна", cls: "" },
+    ];
+
+    const listEl = document.getElementById("tasksList");
+    listEl.innerHTML = "";
+
+    let totalActive = 0;
+    sections.forEach(s => totalActive += grouped[s.key].length);
+    if (totalActive === 0) {
+      listEl.innerHTML = `<div class="empty-state">Активных задач пока нет.<br>Они появятся здесь сами — вручную или из ответов на опросы.</div>`;
+      return;
+    }
+
+    sections.forEach(section => {
+      const items = grouped[section.key];
+      if (!items.length) return;
+
+      const sectionEl = document.createElement("div");
+      sectionEl.innerHTML = `<div class="section-title">${section.title} · ${items.length}</div>`;
+
+      items.forEach(task => {
+        const card = document.createElement("div");
+        card.className = `task-card ${section.cls}`;
+        const deadlineStr = task.deadline
+          ? new Date(task.deadline).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })
+          : "";
+        card.innerHTML = `
+          <div>
+            <div class="title">${escapeHtml(task.title)}</div>
+            <div class="meta">
+              <span class="badge priority-${task.priority}">${PRIORITY_LABEL[task.priority] || task.priority}</span>
+              ${deadlineStr ? `<span class="meta-text">до ${deadlineStr}</span>` : ""}
+            </div>
+          </div>
+          <select data-id="${task.id}">
+            ${Object.entries(STATUS_LABEL).map(([v, l]) =>
+              `<option value="${v}" ${v === task.status ? "selected" : ""}>${l}</option>`).join("")}
+          </select>
+        `;
+        card.querySelector("select").addEventListener("change", async (e) => {
+          const { error } = await db.from("tasks").update({ status: e.target.value }).eq("id", task.id);
+          if (error) alert("Не удалось обновить статус: " + error.message);
+        });
+        sectionEl.appendChild(card);
+      });
+
+      listEl.appendChild(sectionEl);
+    });
+  }
+
+  // ============================================================
+  // КАЛЕНДАРЬ
+  // ============================================================
+  const MONTH_NAMES = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+  let cursorDate = new Date();
+  let calendarMap = {};
+  let selectedKey = null;
+
+  function dateKey(d) {
+    const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function buildCalendarMap(tasks, projects) {
+    const map = {};
+    const add = (item, type) => {
+      if (!item.deadline) return;
+      const key = dateKey(new Date(item.deadline));
+      (map[key] ||= []).push({ id: item.id, type, title: item.title });
+    };
+    tasks.forEach(t => add(t, "task"));
+    projects.forEach(p => add(p, "project"));
+    return map;
+  }
+
+  function buildMonthGrid(year, month) {
+    const firstOfMonth = new Date(year, month, 1);
+    const startOffset = (firstOfMonth.getDay() + 6) % 7;
+    const gridStart = new Date(year, month, 1 - startOffset);
+    const days = [];
+    for (let i = 0; i < 42; i++) {
+      const date = new Date(gridStart);
+      date.setDate(gridStart.getDate() + i);
+      days.push({ date, key: dateKey(date), isCurrentMonth: date.getMonth() === month, isToday: dateKey(date) === dateKey(new Date()) });
+    }
+    return days;
+  }
+
+  async function loadCalendar() {
+    const [tasksRes, projectsRes] = await Promise.all([
+      db.from("tasks").select("*").not("deadline", "is", null),
+      db.from("projects").select("*").not("deadline", "is", null),
+    ]);
+    if (tasksRes.error || projectsRes.error) {
+      console.error(tasksRes.error || projectsRes.error);
+      return;
+    }
+    calendarMap = buildCalendarMap(tasksRes.data, projectsRes.data);
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    const year = cursorDate.getFullYear(), month = cursorDate.getMonth();
+    document.getElementById("monthLabel").textContent = `${MONTH_NAMES[month]} ${year}`;
+
+    const grid = document.getElementById("calendarGrid");
+    grid.innerHTML = "";
+
+    buildMonthGrid(year, month).forEach(day => {
+      const events = calendarMap[day.key] || [];
+      const el = document.createElement("button");
+      el.className = "day";
+      if (!day.isCurrentMonth) el.classList.add("other-month");
+      if (day.isToday) el.classList.add("today");
+      if (events.length) el.classList.add("has-events");
+      if (day.key === selectedKey) el.classList.add("selected");
+
+      el.innerHTML = `<div class="day-number">${day.date.getDate()}</div>
+        <div class="dots">${events.slice(0, 4).map(ev =>
+          `<span class="dot ${ev.type}" title="${escapeHtml(ev.title)}"></span>`).join("")}</div>`;
+
+      if (events.length) {
+        el.addEventListener("click", () => {
+          selectedKey = day.key;
+          renderCalendar();
+          renderDetail(day, events);
+        });
+      }
+      grid.appendChild(el);
+    });
+  }
+
+  function renderDetail(day, events) {
+    const panel = document.getElementById("detailPanel");
+    panel.classList.add("visible");
+    document.getElementById("detailTitle").textContent =
+      day.date.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+    document.getElementById("detailList").innerHTML = events.map(ev => `
+      <div class="event-row">
+        <span class="dot ${ev.type}"></span>
+        <span class="title">${escapeHtml(ev.title)}</span>
+        <span class="event-type">${ev.type === "project" ? "проект" : "задача"}</span>
+      </div>
+    `).join("");
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", () => {
+    cursorDate = new Date(cursorDate.getFullYear(), cursorDate.getMonth() - 1, 1);
+    selectedKey = null;
+    document.getElementById("detailPanel").classList.remove("visible");
+    renderCalendar();
+  });
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    cursorDate = new Date(cursorDate.getFullYear(), cursorDate.getMonth() + 1, 1);
+    selectedKey = null;
+    document.getElementById("detailPanel").classList.remove("visible");
+    renderCalendar();
+  });
+
+  // ============================================================
+  // ЗАПУСК + REALTIME
+  // ============================================================
+  loadSurveys();
+  loadTasks();
+  loadCalendar();
+
+  db.channel("site-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => { loadTasks(); loadCalendar(); })
+    .on("postgres_changes", { event: "*", schema: "public", table: "projects" }, loadCalendar)
+    .on("postgres_changes", { event: "*", schema: "public", table: "surveys" }, loadSurveys)
+    .subscribe();
+</script>
+
+</body>
+</html>
